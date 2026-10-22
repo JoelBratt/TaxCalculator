@@ -1,4 +1,6 @@
 import math
+import csv
+import os
 """
 Joel Bratt
 Tax Calcualator
@@ -14,6 +16,14 @@ while True:
     if status in ["1", "2", "3", "4"]:
         break
     print("Invalid input! Please enter a number between 1 and 4.")
+
+status_labels = {
+    "1": "Single",
+    "2": "Married filing jointly",
+    "3": "Married filing separately",
+    "4": "Head of Household"
+}
+status_name = status_labels[status]
 
 while True:
     try:
@@ -114,12 +124,49 @@ def calculate_federal_tax(fedtaxable, status):
 
     return round(tax, 2)
 
+def export_to_csv(filename = "tax_summary.csv"):
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    file_path = os.path.join(script_dir, filename)
+
+    with open(filename, mode="w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        
+        writer.writerow(["TAX SUMMARY REPORT", ""])
+        writer.writerow(["Taxpayer Name", f"{firstname} {lastname}"])
+        writer.writerow(["Filing Status", status_name])
+        writer.writerow([])
+        
+        writer.writerow(["Category", "Base Amount ($)", "Rate / Details", "Calculated Tax ($)"])
+        
+        writer.writerow(["Federal Income Tax", f"{fedtaxable:,.2f}", "Progressive Brackets (2025)", f"{fed_tax:,.2f}"])
+        writer.writerow(["Ohio State Tax", f"{statetaxable:,.2f}", "Ohio 2025 Brackets", f"{state_tax:,.2f}"])
+        writer.writerow(["Local Tax", f"{localtaxable:,.2f}", f"{localrate_input}% Flat", f"{local_tax:,.2f}"])
+        
+        writer.writerow([]) 
+        writer.writerow(["TOTAL COMBINED TAX", "", "", f"{total_tax:,.2f}"])
+        writer.writerow(["Overall Effective Tax Rate", "", "", f"{effective_rate:.2f}%"])
+
+    print(f"\nSuccessfully saved tax report to '{filename}'!")
+    
 fed_tax = calculate_federal_tax(fedtaxable, status)
 local_tax = calculate_local_tax(localtaxable, localrate_input)
 state_tax = calculate_ohio_tax(statetaxable)
 total_tax = fed_tax + state_tax + local_tax
+effective_rate = (total_tax / fedtaxable * 100) if fedtaxable > 0 else 0.0
+
 print(f'\nGreat job {firstname} {lastname}! Here is your current tax breakdown:')
 print(f' - Federal Income Tax: ${fed_tax:,.2f}')
 print(f' - Ohio State Tax:     ${state_tax:,.2f}')
 print(f' - Local Tax:          ${local_tax:,.2f}')
 print(f' - Total Combined Tax: ${total_tax:,.2f}')
+
+while True:
+    exportquestion = input("Y/N would you like an export of this information? ").strip().lower()
+    if exportquestion in ["y"]:
+        export_to_csv("tax_summary.csv")
+        break
+    elif exportquestion in ["n"]:
+        quit()
+    print("Invalid input! Please enter a letter that is Y or N")

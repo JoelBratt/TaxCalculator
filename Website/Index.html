@@ -8,6 +8,78 @@
 </head>
 
 <body>
-    
+    <div class = "app-container"></div>
+    <h1 class = "page-title">Tax Calculator</h1>
+
+    <main class = "main-grid">
+
+        <section class = "left-panel">
+            <div class = "field-row">
+                <label for = "first-name">First Name:</label>
+                <input type = "text" id = "first-name" placeholder = "First Name"/>
+            </div>
+
+            <div class = "field-row">
+          <label for = "last-name">Last Name:</label>
+          <input type="text" id = "last-name" placeholder = "Last Name" />
+        </div>
+
+        <div class = "field-row">
+          <label for = "filing-status">What is your filing status?</label>
+          <select id = "filing-status">
+            <option value = "" selected disabled>Select status</option>
+            <option value = "1">Single</option>
+            <option value = "2">Married filing jointly</option>
+            <option value = "3">Married filing separately</option>
+            <option value = "4">Head of Household</option>
+          </select>
+        </div>
+
+        <div class = "field-row">
+          <label for = "taxable-income">What is your taxable income?</label>
+          <input type = "text" id = "taxable-income" placeholder = "1,000" />
+        </div>
+
+        <div class = "field-row">
+          <label for = "gross-income">What is your gross income?</label>
+          <input type = "text" id = "gross-income" placeholder = "1,000" />
+        </div>
+
+        <div class = "field-row">
+          <label for = "local-rate">Enter your local tax rate as a percent:</label>
+          <input type = "text" id = "local-rate" placeholder = "1%" />
+        </div>
+
+        <div class = "field-row output-row">
+          <label for = "state-tax">State Tax:</label>
+          <input type = "text" id = "state-tax" placeholder = "0" readonly />
+        </div>
+
+        <div class = "field-row output-row">
+          <label for = "federal-tax">Federal Tax:</label>
+          <input type = "text" id = "federal-tax" placeholder = "0" readonly />
+        </div>
+
+        <div class = "field-row output-row">
+          <label for = "local-tax">Local Tax:</label>
+          <input type = "text" id = "local-tax" placeholder = "0" readonly />
+        </div>
+      </section>
+
+      
+      <section class = "right-panel">
+        <div id = "csv-display" class = "csv-box" aria-label = "CSV Data Display">
+        </div>
+
+        <div class = "csv-actions">
+          <label for = "csv-file-input" class = "btn-action">Import CSV</label>
+          <input type = "file" id = "csv-file-input" accept = ".csv,text/csv" hidden />
+
+          <button type = "button" id = "export-csv-btn" class = "btn-action">Export CSV</button>
+        </div>
+
+
+        </section>
+    </main>
 </body>
 </html>

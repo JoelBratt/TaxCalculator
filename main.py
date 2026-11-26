@@ -124,49 +124,115 @@ def calculate_federal_tax(fedtaxable, status):
 
     return round(tax, 2)
 
-def export_to_csv(filename = "tax_summary.csv"):
-
+def resolve_csv_path(user_path, default_filename="tax_summary.csv"):
+    cleaned = user_path.strip().strip('"').strip("'")
+    if not cleaned:
+        cleaned = default_filename
+    if os.path.isabs(cleaned):
+        return cleaned
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    file_path = os.path.join(script_dir, filename)
+    return os.path.join(script_dir, cleaned)
 
-    with open(filename, mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-        
+
+def import_csv(file_path):
+    if not os.path.exists(file_path):
+        print(f"File not found: '{file_path}'")
+        return None
+
+    with open(file_path, mode="r", newline="", encoding="utf-8") as file:
+        reader = csv.reader(file)
+        rows = list(reader)
+
+    print(f"\nLoaded {len(rows)} rows from '{file_path}'.")
+    return rows
+
+
+def write_report_rows(writer, include_header=True):
+    if include_header:
         writer.writerow(["TAX SUMMARY REPORT", ""])
         writer.writerow(["Taxpayer Name", f"{firstname} {lastname}"])
         writer.writerow(["Filing Status", status_name])
         writer.writerow([])
-        
         writer.writerow(["Category", "Base Amount ($)", "Rate / Details", "Calculated Tax ($)"])
-        
-        writer.writerow(["Federal Income Tax", f"{fedtaxable:,.2f}", "Progressive Brackets (2025)", f"{fed_tax:,.2f}"])
-        writer.writerow(["Ohio State Tax", f"{statetaxable:,.2f}", "Ohio 2025 Brackets", f"{state_tax:,.2f}"])
-        writer.writerow(["Local Tax", f"{localtaxable:,.2f}", f"{localrate_input}% Flat", f"{local_tax:,.2f}"])
-        
-        writer.writerow([]) 
-        writer.writerow(["TOTAL COMBINED TAX", "", "", f"{total_tax:,.2f}"])
-        writer.writerow(["Overall Effective Tax Rate", "", "", f"{effective_rate:.2f}%"])
 
-    print(f"\nSuccessfully saved tax report to '{filename}'!")
-    
+    writer.writerow(
+        ["Federal Income Tax", f"{fedtaxable:,.2f}", "Progressive Brackets (2025)", f"{fed_tax:,.2f}"]
+    )
+    writer.writerow(["Ohio State Tax", f"{statetaxable:,.2f}", "Ohio 2025 Brackets", f"{state_tax:,.2f}"])
+    writer.writerow(["Local Tax", f"{localtaxable:,.2f}", f"{localrate_input}% Flat", f"{local_tax:,.2f}"])
+    writer.writerow([])
+    writer.writerow(["TOTAL COMBINED TAX", "", "", f"{total_tax:,.2f}"])
+    writer.writerow(["Overall Effective Tax Rate", "", "", f"{effective_rate:.2f}%"])
+
+
+def export_to_csv(file_path, append=False):
+    file_exists = os.path.exists(file_path) and os.path.getsize(file_path) > 0
+    mode = "a" if (append and file_exists) else "w"
+
+
+    needs_leading_blank = mode == "a"
+
+    with open(file_path, mode=mode, newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        if needs_leading_blank:
+            writer.writerow([])
+            writer.writerow(["--- UPDATED / NEW ENTRY ---", "", "", ""])
+        write_report_rows(writer, include_header=not needs_leading_blank)
+
+    action_word = "Appended to" if mode == "a" else "Saved"
+    print(f"\nSuccessfully {action_word.lower()} tax report: '{file_path}'")
+
+
 fed_tax = calculate_federal_tax(fedtaxable, status)
 local_tax = calculate_local_tax(localtaxable, localrate_input)
 state_tax = calculate_ohio_tax(statetaxable)
 total_tax = fed_tax + state_tax + local_tax
 effective_rate = (total_tax / fedtaxable * 100) if fedtaxable > 0 else 0.0
 
-print(f'\nGreat job {firstname} {lastname}! Here is your current tax breakdown:')
-print(f' - Federal Income Tax: ${fed_tax:,.2f}')
-print(f' - Ohio State Tax:     ${state_tax:,.2f}')
-print(f' - Local Tax:          ${local_tax:,.2f}')
-print(f' - Total Combined Tax: ${total_tax:,.2f}')
+print(f"\nGreat job {firstname} {lastname}! Here is your current tax breakdown:")
+print(f" - Federal Income Tax: ${fed_tax:,.2f}")
+print(f" - Ohio State Tax:     ${state_tax:,.2f}")
+print(f" - Local Tax:          ${local_tax:,.2f}")
+print(f" - Total Combined Tax: ${total_tax:,.2f}")
+
+imported_path = None
+imported_rows = None
 
 while True:
-    exportquestion = input("Y/N would you like an export of this information? ").strip().lower()
-    if exportquestion in ["y"]:
-        export_to_csv("tax_summary.csv")
+    upload_choice = (
+        input("\nY/N would you like to upload an existing CSV to add new rows below it? ")
+        .strip()
+        .lower()
+    )
+    if upload_choice == "y":
+        raw_path = input(
+            "Enter CSV filename or full path (press Enter for 'tax_summary.csv' in script folder): "
+        )
+        candidate_path = resolve_csv_path(raw_path)
+        rows = import_csv(candidate_path)
+        if rows is not None:
+            imported_path = candidate_path
+            imported_rows = rows
+            break
+    elif upload_choice == "n":
         break
-    elif exportquestion in ["n"]:
-        quit()
-    print("Invalid input! Please enter a letter that is Y or N")
+    else:
+        print("Invalid input! Please enter Y or N.")
+
+while True:
+    exportquestion = input("Y/N would you like to export/update the CSV? ").strip().lower()
+    if exportquestion == "y":
+        if imported_path:
+            target_path = imported_path
+            export_to_csv(target_path, append = True)
+        else:
+            raw_save = input(
+                "Enter output CSV filename (press Enter for 'tax_summary.csv' in script folder): "
+            )
+            target_path = resolve_csv_path(raw_save)
+            export_to_csv(target_path, append = False)
+        break
+    elif exportquestion == "n":
+        break
+    else:
+        print("Invalid input! Please enter a letter that is Y or N")

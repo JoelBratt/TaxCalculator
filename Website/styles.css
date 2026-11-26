@@ -1,0 +1,128 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #3b76f6;
+  color: #111111;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 20px 24px 40px;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.app-container {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 350px min(460px, 45vw);
+  gap: 24px;
+  align-items: start;
+  justify-content: center;
+}
+
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 195px 140px;
+  align-items: center;
+  gap: 12px;
+}
+
+
+.field-row label,
+.output-row label {
+  font-size: 1.15rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.field-row input,
+.field-row select {
+  height: 36px;
+  background-color: #ffffff;
+  border: 1px solid #222222;
+  color: #111111;
+  font-size: 1.05rem;
+  text-align: center;
+  padding: 0 8px;
+  width: 100%;
+}
+
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+.csv-box {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: #ffffff;
+  border: 1px solid #222222;
+  padding: 14px;
+  overflow: auto;
+}
+
+.csv-actions {
+  margin-top: 16px;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
+  height: 40px;
+  padding: 0 16px;
+  background-color: #ffffff;
+  border: 1px solid #222222;
+  color: #111111;
+  font-size: 1.15rem;
+  font-family: Arial, Helvetica, sans-serif;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-action:hover {
+  background-color: #f2f4f8;
+}
+
+
+@media (max-width: 900px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .csv-box {
+    width: min(85vw, 460px);
+    aspect-ratio: 1 / 1;
+  }
+
+  .field-row {
+    grid-template-columns: 195px 140px;
+  }
+}
